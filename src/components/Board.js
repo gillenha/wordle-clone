@@ -32,15 +32,17 @@ function Board() {
         });
     };
 
-    // For handleBackspaceClick, ensure you're creating a new copy of guesses and then updating the state.
     const handleBackspaceClick = () => {
         setGuesses(prevGuesses => {
             // Copy the current row
             const newRow = [...prevGuesses[currentRow]];
-            // Remove the last letter
-            newRow.pop();
-            // Fill in the space with an empty string
-            newRow.push('');
+            // Find the last non-empty cell in the current row and set it to empty
+            for (let i = newRow.length - 1; i >= 0; i--) {
+                if (newRow[i] !== '') {
+                    newRow[i] = '';
+                    break;
+                }
+            }
             // Now create a new array for the guesses to update the state immutably
             const newGuesses = prevGuesses.map((guess, index) => 
                 index === currentRow ? newRow : guess
@@ -48,19 +50,31 @@ function Board() {
             return newGuesses;
         });
     };
+    
+    
 
     // Update handleSubmitGuess similarly
     const handleSubmitGuess = () => {
-        const currentGuess = guesses[currentRow].join(''); // Convert the array of letters to a string
-
-        if (currentGuess.length === 5) {
-            console.log('Guess submitted:', currentGuess);
-            // Move to the next row
-            setCurrentRow(currentRow + 1);
+        if (currentRow < 6) {
+            const currentGuess = guesses[currentRow].join(''); // Convert the array of letters to a string
+    
+            if (currentGuess.length === 5) {
+                console.log('Guess submitted:', currentGuess);
+                // Move to the next row only if the currentRow is less than 5
+                if (currentRow < 5) {
+                    setCurrentRow(prevRow => prevRow + 1);
+                } else {
+                    // If the currentRow is 5, this means the user has used all their guesses and should not be able to guess anymore
+                    console.log('All guesses used. Please reset the game.');
+                }
+            } else {
+                console.log('A guess must be 5 letters.');
+            }
         } else {
-            console.log('A guess must be 5 letters.');
+            console.log('No more guesses allowed. Please reset the game.');
         }
     };
+    
 
     
     const handleEnterClick = () => {
@@ -78,14 +92,7 @@ function Board() {
             } else if (event.key === 'Enter') {
                 handleSubmitGuess();
             } else if (event.key === 'Backspace') {
-                setGuesses(prevGuesses => {
-                    const newGuesses = [...prevGuesses];
-                    const newRow = [...newGuesses[currentRow]]; // Ensure a deep copy is made
-                    newRow.pop(); // Remove the last element
-                    newRow.push(''); // Add an empty string to keep the array's length consistent
-                    newGuesses[currentRow] = newRow;
-                    return newGuesses;
-                });
+                handleBackspaceClick();
             }
         };
     
@@ -95,9 +102,9 @@ function Board() {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [currentRow, guesses]); // Add the dependencies here
-      
-
+    }, [guesses, currentRow]); // Include dependencies here
+    
+    
     useEffect(() => {
         // Load saved game state from local storage when the component mounts
         const savedGuesses = JSON.parse(localStorage.getItem('guesses'));
@@ -181,3 +188,4 @@ function Board() {
 }
 
 export default Board;
+//this should be missing
