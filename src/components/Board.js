@@ -1,83 +1,131 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Keyboard from './Keyboard';
+import WORDS from './words';
 import '../styles/Board.scss';
 
 const Board = () => {
     const [guesses, setGuesses] = useState(() => Array(6).fill(Array(5).fill('')));
     const [currentRow, setCurrentRow] = useState(0); // starting with the first row
+    const [gameOver, setGameOver] = useState(false);
+    const chosenWord = WORDS[Math.floor(Math.random() * WORDS.length)].toUpperCase(); // Randomly select a word from the array
+
     // const createEmptyBoard = () => Array(6).fill(null).map(() => Array(5).fill(''));
       
+    const checkGuess = useCallback((guess) => {
+        const result = [];
+      
+        // Convert guess and chosenWord to arrays to compare them
+        const guessArray = guess.split('');
+        const chosenWordArray = chosenWord.split('');
+      
+        // First pass to check for correct position
+        guessArray.forEach((letter, index) => {
+          if (letter === chosenWordArray[index]) {
+            result.push({ letter, color: 'green' });
+            chosenWordArray[index] = null; // Mark this letter as checked
+          } else {
+            result.push({ letter, color: 'grey' }); // Temporarily mark as grey
+          }
+        });
+      
+        // Second pass to check for correct letters in the wrong position
+        result.forEach((check, index) => {
+          if (check.color === 'grey') {
+            const pos = chosenWordArray.indexOf(check.letter);
+            if (pos > -1) {
+              result[index].color = 'yellow';
+              chosenWordArray[pos] = null; // Mark this letter as checked
+            }
+          }
+        });
+      
+        return result;
+      }, [chosenWord]);
+
+      const handleSubmitGuess = useCallback(() => {
+        if (!gameOver && currentRow < 6) {
+            const currentGuess = guesses[currentRow].join('').toUpperCase(); // Convert the array of letters to a string
+    
+            if (currentGuess.length === 5) {
+                const guessCheck = checkGuess(currentGuess);
+                console.log(guessCheck.map(check => check.letter + ':' + check.color));
+                if (currentGuess === chosenWord) {
+                    console.log('Congratulations! You guessed the word');
+                } else {
+                    console.log('Incorrect guess:', currentGuess);
+                    if (currentRow < 5) {
+                        setCurrentRow(prevRow => prevRow + 1);
+                    } else {
+                        console.log('All guesses used. Please refresh the page')
+                    }
+                }
+            } else {
+                console.log('A guess must be 5 letters.');
+            }
+            if (currentRow === 5) {
+                setGameOver(true);
+                console.log('All guesses allowed. Please refresh the page')
+            }
+        } else {
+            console.log('No more guesses allowed. Please refresh the page.');
+        }
+    }, [guesses, currentRow, chosenWord, gameOver, setGameOver, checkGuess]);
+    
     // For handleKeyClick, you want to ensure you're not mutating the state directly.
     // Instead, you should create a copy of the row you're updating.
     const handleKeyClick = useCallback((letter) => {
-        setGuesses(prevGuesses => {
-            // Copy the current row
-            const newRow = [...prevGuesses[currentRow]];
-            // Find the first empty cell in the current row
-            const emptyIndex = newRow.indexOf('');
-            
-            if (emptyIndex !== -1) {
-                // Update the copy with the new letter
-                newRow[emptyIndex] = letter;
+        if (!gameOver) {
+            setGuesses(prevGuesses => {
+                // Copy the current row
+                const newRow = [...prevGuesses[currentRow]];
+                // Find the first empty cell in the current row
+                const emptyIndex = newRow.indexOf('');
+                
+                if (emptyIndex !== -1) {
+                    // Update the copy with the new letter
+                    newRow[emptyIndex] = letter;
+                    // Now create a new array for the guesses to update the state immutably
+                    const newGuesses = prevGuesses.map((guess, index) => 
+                        index === currentRow ? newRow : guess
+                    );
+                    return newGuesses;
+                }
+                return prevGuesses; // In case there's no empty space, return the previous guesses unchanged
+            });
+        }
+    },[currentRow, gameOver]);
+
+    const handleBackspaceClick = useCallback(() => {
+        if (!gameOver && currentRow < 6) {
+            setGuesses(prevGuesses => {
+                // Copy the current row
+                const newRow = [...prevGuesses[currentRow]];
+                // Find the last non-empty cell in the current row and set it to empty
+                for (let i = newRow.length - 1; i >= 0; i--) {
+                    if (newRow[i] !== '') {
+                        newRow[i] = '';
+                        break;
+                    }
+                }
                 // Now create a new array for the guesses to update the state immutably
                 const newGuesses = prevGuesses.map((guess, index) => 
                     index === currentRow ? newRow : guess
                 );
                 return newGuesses;
-            }
-            return prevGuesses; // In case there's no empty space, return the previous guesses unchanged
-        });
-    },[currentRow]);
-
-    const handleBackspaceClick = useCallback(() => {
-        setGuesses(prevGuesses => {
-            // Copy the current row
-            const newRow = [...prevGuesses[currentRow]];
-            // Find the last non-empty cell in the current row and set it to empty
-            for (let i = newRow.length - 1; i >= 0; i--) {
-                if (newRow[i] !== '') {
-                    newRow[i] = '';
-                    break;
-                }
-            }
-            // Now create a new array for the guesses to update the state immutably
-            const newGuesses = prevGuesses.map((guess, index) => 
-                index === currentRow ? newRow : guess
-            );
-            return newGuesses;
-        });
-    },[currentRow]);
-    
-    
-
-    // Update handleSubmitGuess similarly
-    const handleSubmitGuess = useCallback(() => {
-        if (currentRow < 6) {
-            const currentGuess = guesses[currentRow].join(''); // Convert the array of letters to a string
-    
-            if (currentGuess.length === 5) {
-                console.log('Guess submitted:', currentGuess);
-                // Move to the next row only if the currentRow is less than 5
-                if (currentRow < 5) {
-                    setCurrentRow(prevRow => prevRow + 1);
-                } else {
-                    // If the currentRow is 5, this means the user has used all their guesses and should not be able to guess anymore
-                    console.log('All guesses used. Please refresh the page.');
-                }
-            } else {
-                console.log('A guess must be 5 letters.');
-            }
-        } else {
-            console.log('No more guesses allowed. Please refresh the page.');
+            });
         }
-    }, [guesses, currentRow]);
-    
+        
+    },[currentRow, gameOver]);
+      
+    // Update handleSubmitGuess similarly
 
     
     const handleEnterClick = () => {
         // Call the handleSubmitGuess function
         handleSubmitGuess();
     };
+
+
     
     // Add these click handlers to your buttons in the render method
 
