@@ -1,0 +1,104 @@
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+  
+.board {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-gap: 10px;
+    width: 50%; // Adjust as needed
+    // margin-right: 8px;
+    margin: 20px auto;
+  
+.row {
+    display: flex;
+    justify-content: center;
+    
+    .cell {
+            width: 40px; // Adjust cell width as needed
+            height: 40px; // Adjust cell height as needed
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: .5%;
+            font-size: 2rem;
+            color: white;
+            font-family: sans-serif;
+        }
+    }
+}
+
+.keyboard-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.keyboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 80%;
+    margin: 20px auto;
+    justify-content: center;
+    
+    .key {
+        font-family: 'Arial', sans-serif;
+        font-size: 1em;
+        font-weight: bold;
+        border: 1px solid #ccc;
+        padding: 0;
+        margin: 0;
+        // margin-right: 8px;
+        height: 3rem;
+        flex-basis: auto;
+        width: 3rem;
+        border-radius: 4px;
+        cursor: pointer;
+        user-select: none;
+        background-color: #f7f7f7;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-transform: uppercase;
+        transition: background-color 0.1s ease, color 0.1s ease;
+    
+            &:hover {
+                background-color: #e0e0e0;
+        }
+    }
+    
+    .enter-key, .backspace-key {
+        flex-basis: 11.1%;
+        font-size: 1em;
+        text-align: center;
+    }
+
+    .break {
+            flex-basis: 100%;
+            height: 0;
+            overflow: hidden;
+    }
+}
+
+/* Media query for when screen width is less than 520px */
+@media screen and (max-width: 740px) {
+    .keyboard {
+        width: 100%
+    }
+
+    .key {
+        flex-basis: auto;
+        width: calc(3rem * 0.8);
+    }
+
+    .enter-key, .backspace-key {
+        width: calc(3rem * 0.8);
+    }
+}
+  
+  // Remove the .second-row and .third-row adjustments 
+  // as we don't have these class names in your JSX.
+  
