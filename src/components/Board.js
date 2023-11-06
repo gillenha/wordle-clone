@@ -7,10 +7,14 @@ const Board = () => {
     const [guesses, setGuesses] = useState(() => Array(6).fill(Array(5).fill('')));
     const [currentRow, setCurrentRow] = useState(0); // starting with the first row
     const [gameOver, setGameOver] = useState(false);
+    const [guessResults, setGuessResults] = useState(() => {
+        // Try to load the saved results from local storage, or default to an empty array
+        const saved = localStorage.getItem('guessResults');
+        return saved ? JSON.parse(saved) : Array(6).fill(Array(5).fill({ letter: '', color: 'black' }));
+      });    
     const chosenWord = WORDS[Math.floor(Math.random() * WORDS.length)].toUpperCase(); // Randomly select a word from the array
+    const emptyGuess = () => Array(5).fill(null).map(() => ({ letter: '', color: 'grey' }));
 
-    // const createEmptyBoard = () => Array(6).fill(null).map(() => Array(5).fill(''));
-      
     const checkGuess = useCallback((guess) => {
         const result = [];
       
@@ -49,6 +53,11 @@ const Board = () => {
             if (currentGuess.length === 5) {
                 const guessCheck = checkGuess(currentGuess);
                 console.log(guessCheck.map(check => check.letter + ':' + check.color));
+                setGuessResults(prevResults => {
+                    const newResults = [...prevResults];
+                    newResults[currentRow] = guessCheck;
+                    return newResults;
+                });
                 if (currentGuess === chosenWord) {
                     console.log('Congratulations! You guessed the word');
                 } else {
@@ -70,7 +79,7 @@ const Board = () => {
             console.log('No more guesses allowed. Please refresh the page.');
         }
     }, [guesses, currentRow, chosenWord, gameOver, setGameOver, checkGuess]);
-    
+
     // For handleKeyClick, you want to ensure you're not mutating the state directly.
     // Instead, you should create a copy of the row you're updating.
     const handleKeyClick = useCallback((letter) => {
@@ -125,7 +134,23 @@ const Board = () => {
         handleSubmitGuess();
     };
 
+    const handleResetGame = useCallback(() => {
+        // Clear the localStorage
+        localStorage.removeItem('guesses');
+        localStorage.removeItem('currentRow');
+        localStorage.removeItem('guessResults');
+    
+        // Reset the game state
+        setGuesses(Array(6).fill(Array(5).fill('')));
+        setCurrentRow(0);
+        setGuessResults(Array(6).fill(Array(5).fill({ letter: '', color: 'grey' })));
+        setGameOver(false);
+        setGuessResults(Array(6).fill(null).map(emptyGuess));
 
+        
+        // Optionally, reset the chosen word
+        // chosenWord = WORDS[Math.floor(Math.random() * WORDS.length)].toUpperCase();
+    }, []);
     
     // Add these click handlers to your buttons in the render method
 
@@ -161,25 +186,53 @@ const Board = () => {
         if (!isNaN(savedCurrentRow)) {
           setCurrentRow(savedCurrentRow);
         }
-        // ... Rest of your code to handle keydown events
-      }, []); // This will run only once when the component mounts
+        const savedGuessResults = JSON.parse(localStorage.getItem('guessResults'));
+        if (savedGuessResults && savedGuessResults.length) {
+          setGuessResults(savedGuessResults);
+        }
+        return () => {
+            // ComponentWillUnmount logic here
+            // Optionally clear the game state here if you want it to reset on page refresh
+            handleResetGame();
+        };
+    }, [handleResetGame]); // This will run only once when the component mounts
  
+    useEffect(() => {
+        localStorage.setItem('guessResults', JSON.stringify(guessResults));
+      }, [guessResults]);
+
     return (
         <div className="board-container">
-        <div className="board">
-            {[...Array(6)].map((_, rowIndex) => (
-            <div key={rowIndex} className="row">
-                {[...Array(5)].map((_, colIndex) => (
-                <div key={colIndex} className="cell">{guesses[rowIndex][colIndex]}</div>
+            <div className="board">
+            {/* Inside the Board component, where you map over the guesses to create the board */}
+                {[...Array(6)].map((_, rowIndex) => (
+                    <div key={rowIndex} className="row">
+                        {[...Array(5)].map((_, colIndex) => {
+                        // Determine the class for the cell based on the guessResults
+                        let cellClass = "cell";
+                        if (guessResults[rowIndex] && guessResults[rowIndex][colIndex]) {
+                            const result = guessResults[rowIndex][colIndex];
+                            cellClass += ` cell-${result.color}`; // This will append ' cell-grey', ' cell-yellow', or ' cell-green' to the class
+                        }
+
+                        return (
+                            <div key={colIndex} className={`cell${guessResults[rowIndex][colIndex].color !== 'black' ? ` cell-${guessResults[rowIndex][colIndex].color}` : ''}`}>
+                              {guesses[rowIndex][colIndex]}
+                            </div>
+                          );
+                          
+                          
+                        })}
+                    </div>
                 ))}
             </div>
-            ))}
-        </div>
-        <Keyboard
-            onKeyClick={handleKeyClick}
-            onEnterClick={handleEnterClick}
-            onBackspaceClick={handleBackspaceClick}
-        />
+                <Keyboard
+                    onKeyClick={handleKeyClick}
+                    onEnterClick={handleEnterClick}
+                    onBackspaceClick={handleBackspaceClick}
+                />
+                <button onClick={handleResetGame}>Reset Game</button>
+
     </div>
   );
 }

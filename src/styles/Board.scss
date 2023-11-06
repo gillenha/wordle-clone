@@ -25,6 +25,22 @@
             font-size: 2rem;
             color: white;
             font-family: sans-serif;
+            background-color: black;
+        
+        &.cell-grey {
+                background-color: grey;
+                color: #fff;
+            }
+            
+        &.cell-yellow {
+                background-color: yellow;
+                color: #333;
+            }
+            
+        &.cell-green {
+                background-color: green;
+                color: #fff;
+            }
         }
     }
 }
