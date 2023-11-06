@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import Keyboard from './Keyboard';
 import '../styles/Board.scss';
 
 function Board() {
     const [guesses, setGuesses] = useState(Array(6).fill(Array(5).fill(''))); // 6 rows, 5 columns filled with empty strings
     const [currentRow, setCurrentRow] = useState(0); // starting with the first row
-    const resetGame = () => {
-        setGuesses(Array(6).fill(Array(5).fill('')));
-        setCurrentRow(0);
-        // Reset any other states as necessary
-      };
+    // const createEmptyBoard = () => Array(6).fill(null).map(() => Array(5).fill(''));
       
-        // For handleKeyClick, you want to ensure you're not mutating the state directly.
-        // Instead, you should create a copy of the row you're updating.
+    // For handleKeyClick, you want to ensure you're not mutating the state directly.
+    // Instead, you should create a copy of the row you're updating.
     const handleKeyClick = (letter) => {
         setGuesses(prevGuesses => {
             // Copy the current row
@@ -65,13 +62,13 @@ function Board() {
                     setCurrentRow(prevRow => prevRow + 1);
                 } else {
                     // If the currentRow is 5, this means the user has used all their guesses and should not be able to guess anymore
-                    console.log('All guesses used. Please reset the game.');
+                    console.log('All guesses used. Please refresh the page.');
                 }
             } else {
                 console.log('A guess must be 5 letters.');
             }
         } else {
-            console.log('No more guesses allowed. Please reset the game.');
+            console.log('No more guesses allowed. Please refresh the page.');
         }
     };
     
@@ -119,11 +116,11 @@ function Board() {
         // ... Rest of your code to handle keydown events
       }, []); // This will run only once when the component mounts
     
-      useEffect(() => {
-        // Save game state to local storage on guesses or currentRow change
-        localStorage.setItem('guesses', JSON.stringify(guesses));
-        localStorage.setItem('currentRow', currentRow.toString());
-      }, [guesses, currentRow]); // This will run whenever guesses or currentRow changes
+    //   useEffect(() => {
+    //     // Save game state to local storage on guesses or currentRow change
+    //     localStorage.setItem('guesses', JSON.stringify(guesses));
+    //     localStorage.setItem('currentRow', currentRow.toString());
+    //   }, [guesses, currentRow]); // This will run whenever guesses or currentRow changes
         
     return (
         <div className="board-container">
@@ -136,53 +133,11 @@ function Board() {
             </div>
             ))}
         </div>
-
-        {/* Keyboard */}
-        <div className="keyboard-container">
-        <div className="keyboard">
-            {/* First Row: 10 keys */}
-            <div className="key first-row" onClick={() => handleKeyClick('Q')}>Q</div>
-            <div className="key first-row" onClick={() => handleKeyClick('W')}>W</div>
-            <div className="key first-row" onClick={() => handleKeyClick('E')}>E</div>
-            <div className="key first-row" onClick={() => handleKeyClick('R')}>R</div>
-            <div className="key first-row" onClick={() => handleKeyClick('T')}>T</div>
-            <div className="key first-row" onClick={() => handleKeyClick('Y')}>Y</div>
-            <div className="key first-row" onClick={() => handleKeyClick('U')}>U</div>
-            <div className="key first-row" onClick={() => handleKeyClick('I')}>I</div>
-            <div className="key first-row" onClick={() => handleKeyClick('O')}>O</div>
-            <div className="key first-row" onClick={() => handleKeyClick('P')}>P</div>
-            <div className="break"></div>
-
-
-            {/* Second Row: 9 keys */}
-            <div className="key second-row" onClick={() => handleKeyClick('A')}>A</div>
-            <div className="key second-row" onClick={() => handleKeyClick('S')}>S</div>
-            <div className="key second-row" onClick={() => handleKeyClick('D')}>D</div>
-            <div className="key second-row" onClick={() => handleKeyClick('F')}>F</div>
-            <div className="key second-row" onClick={() => handleKeyClick('G')}>G</div>
-            <div className="key second-row" onClick={() => handleKeyClick('H')}>H</div>
-            <div className="key second-row" onClick={() => handleKeyClick('J')}>J</div>
-            <div className="key second-row" onClick={() => handleKeyClick('K')}>K</div>
-            <div className="key second-row" onClick={() => handleKeyClick('L')}>L</div>
-            <div className="break"></div>
-
-
-            {/* Third Row: 9 keys including Enter and Backspace */}
-            <div className="key enter-key third-row" onClick={() => handleEnterClick()}>Enter</div>
-            <div className="key third-row" onClick={() => handleKeyClick('Z')}>Z</div>
-            <div className="key third-row" onClick={() => handleKeyClick('X')}>X</div>
-            <div className="key third-row" onClick={() => handleKeyClick('C')}>C</div>
-            <div className="key third-row" onClick={() => handleKeyClick('V')}>V</div>
-            <div className="key third-row" onClick={() => handleKeyClick('B')}>B</div>
-            <div className="key third-row" onClick={() => handleKeyClick('N')}>N</div>
-            <div className="key third-row" onClick={() => handleKeyClick('M')}>M</div>
-            <div className="key backspace-key third-row" onClick={() => handleBackspaceClick()}>x</div>
-                <div className="break"></div>
-                <button onClick={resetGame}>Reset Game</button>
-
-        </div>
-        </div>
-
+        <Keyboard
+            onKeyClick={handleKeyClick}
+            onEnterClick={handleEnterClick}
+            onBackspaceClick={handleBackspaceClick}
+        />
     </div>
   );
 }
