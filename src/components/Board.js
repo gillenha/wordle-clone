@@ -29,7 +29,7 @@ const Board = () => {
         });
     },[currentRow]);
 
-    const handleBackspaceClick = () => {
+    const handleBackspaceClick = useCallback(() => {
         setGuesses(prevGuesses => {
             // Copy the current row
             const newRow = [...prevGuesses[currentRow]];
@@ -46,12 +46,12 @@ const Board = () => {
             );
             return newGuesses;
         });
-    };
+    },[currentRow]);
     
     
 
     // Update handleSubmitGuess similarly
-    const handleSubmitGuess = () => {
+    const handleSubmitGuess = useCallback(() => {
         if (currentRow < 6) {
             const currentGuess = guesses[currentRow].join(''); // Convert the array of letters to a string
     
@@ -70,7 +70,7 @@ const Board = () => {
         } else {
             console.log('No more guesses allowed. Please refresh the page.');
         }
-    };
+    }, [guesses, currentRow]);
     
 
     
@@ -99,7 +99,7 @@ const Board = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [guesses, currentRow]); // Include dependencies here
+    }, [handleKeyClick, handleBackspaceClick, handleSubmitGuess]); // Include dependencies here
     
     
     useEffect(() => {
