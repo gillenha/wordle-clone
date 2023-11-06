@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Keyboard from './Keyboard';
 import '../styles/Board.scss';
 
-function Board() {
-    const [guesses, setGuesses] = useState(Array(6).fill(Array(5).fill(''))); // 6 rows, 5 columns filled with empty strings
+const Board = () => {
+    const [guesses, setGuesses] = useState(() => Array(6).fill(Array(5).fill('')));
     const [currentRow, setCurrentRow] = useState(0); // starting with the first row
     // const createEmptyBoard = () => Array(6).fill(null).map(() => Array(5).fill(''));
       
     // For handleKeyClick, you want to ensure you're not mutating the state directly.
     // Instead, you should create a copy of the row you're updating.
-    const handleKeyClick = (letter) => {
+    const handleKeyClick = useCallback((letter) => {
         setGuesses(prevGuesses => {
             // Copy the current row
             const newRow = [...prevGuesses[currentRow]];
@@ -27,7 +27,7 @@ function Board() {
             }
             return prevGuesses; // In case there's no empty space, return the previous guesses unchanged
         });
-    };
+    },[currentRow]);
 
     const handleBackspaceClick = () => {
         setGuesses(prevGuesses => {
@@ -115,13 +115,7 @@ function Board() {
         }
         // ... Rest of your code to handle keydown events
       }, []); // This will run only once when the component mounts
-    
-    //   useEffect(() => {
-    //     // Save game state to local storage on guesses or currentRow change
-    //     localStorage.setItem('guesses', JSON.stringify(guesses));
-    //     localStorage.setItem('currentRow', currentRow.toString());
-    //   }, [guesses, currentRow]); // This will run whenever guesses or currentRow changes
-        
+ 
     return (
         <div className="board-container">
         <div className="board">
