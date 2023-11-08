@@ -25,6 +25,22 @@
             font-size: 2rem;
             color: white;
             font-family: sans-serif;
+            background-color: black;
+        
+        &.cell-grey {
+                background-color: grey;
+                color: #fff;
+            }
+            
+        &.cell-yellow {
+                background-color: yellow;
+                color: #333;
+            }
+            
+        &.cell-green {
+                background-color: green;
+                color: #fff;
+            }
         }
     }
 }
@@ -64,7 +80,21 @@
         align-items: center;
         text-transform: uppercase;
         transition: background-color 0.1s ease, color 0.1s ease;
+        
+        &.key-grey {
+            background-color: #787c7e; // or any shade of grey you prefer
+            color: #fff;
+        }
     
+        &.key-yellow {
+            background-color: #c9b458; // or any shade of yellow you prefer
+            color: #333;
+        }
+    
+        &.key-green {
+            background-color: #6aaa64; // or any shade of green you prefer
+            color: #fff;
+        }
             &:hover {
                 background-color: #e0e0e0;
         }
@@ -82,7 +112,12 @@
             overflow: hidden;
     }
 }
-
+.end-game-message {
+    margin: 20px;
+    font-size: 1.5rem;
+    color: white;
+    // Add any additional styling you want here
+  }
 /* Media query for when screen width is less than 520px */
 @media screen and (max-width: 740px) {
     .keyboard {
